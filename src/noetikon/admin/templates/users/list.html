@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block title %}Users - Noetikon{% endblock %}
+{% block content %}
+<hgroup>
+    <h2>Users</h2>
+    <p>Manage trusted users and their settings</p>
+</hgroup>
+
+<a href="/users/new" role="button" class="outline" style="margin-bottom: 1rem; display: inline-block;">+ Add user</a>
+
+<table>
+    <thead>
+        <tr>
+            <th>Username</th>
+            <th>User ID</th>
+            <th>Group ID</th>
+            <th>Email</th>
+            <th>Badge</th>
+            <th>Messages</th>
+            <th>Status</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <tr>
+            <td>{{ user.tg_username or '—' }}</td>
+            <td>{{ user.tg_user_id }}</td>
+            <td>{{ user.group_id }}</td>
+            <td>{{ user.email or '—' }}</td>
+            <td>{{ user.badge or '—' }}</td>
+            <td>{{ user.message_count }}</td>
+            <td>
+                {% if user.is_trusted %}
+                <span class="badge badge-trusted">trusted</span>
+                {% else %}
+                <span class="badge badge-untrusted">blocked</span>
+                {% endif %}
+            </td>
+            <td>
+                <div class="actions">
+                    <a href="/users/{{ user.id }}/edit" role="button" class="outline secondary" style="padding: 4px 12px; font-size: 0.85em;">Edit</a>
+                    <form method="post" action="/users/{{ user.id }}/toggle-trust">
+                        <button type="submit" class="{% if user.is_trusted %}secondary{% else %}contrast{% endif %}">
+                            {% if user.is_trusted %}Block{% else %}Trust{% endif %}
+                        </button>
+                    </form>
+                    <form method="post" action="/users/{{ user.id }}/delete" onsubmit="return confirm('Delete this user?')">
+                        <button type="submit" class="secondary outline" style="color: var(--pico-del-color);">Del</button>
+                    </form>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+        {% if not users %}
+        <tr><td colspan="8" style="text-align: center;">No users yet</td></tr>
+        {% endif %}
+    </tbody>
+</table>
+{% endblock %}

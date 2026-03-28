@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ "Edit" if user else "New" }} User - Noetikon{% endblock %}
+{% block content %}
+<h2>{{ "Edit User" if user else "New User" }}</h2>
+
+<form method="post" action="{% if user %}/users/{{ user.id }}/edit{% else %}/users/new{% endif %}">
+    {% if not user %}
+    <label for="group_id">Group ID (Telegram chat ID)</label>
+    <input type="number" id="group_id" name="group_id" required>
+
+    <label for="tg_user_id">Telegram User ID</label>
+    <input type="number" id="tg_user_id" name="tg_user_id" required>
+    {% endif %}
+
+    <label for="tg_username">Telegram Username</label>
+    <input type="text" id="tg_username" name="tg_username" value="{{ user.tg_username or '' if user else '' }}" placeholder="@username">
+
+    <label for="email">Email</label>
+    <input type="email" id="email" name="email" value="{{ user.email or '' if user else '' }}" placeholder="user@company.com">
+
+    <fieldset>
+        <label>
+            <input type="checkbox" name="is_trusted" value="true" {% if not user or user.is_trusted %}checked{% endif %}>
+            Trusted (can interact with bot)
+        </label>
+    </fieldset>
+
+    <div style="display: flex; gap: 1rem;">
+        <button type="submit">Save</button>
+        <a href="/users" role="button" class="secondary outline">Cancel</a>
+    </div>
+</form>
+{% endblock %}

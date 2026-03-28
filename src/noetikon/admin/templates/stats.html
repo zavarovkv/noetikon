@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Stats - Noetikon{% endblock %}
+{% block content %}
+<hgroup>
+    <h2>Statistics</h2>
+    <p>Claude API usage for the last {{ days }} days</p>
+</hgroup>
+
+<div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem;">
+    <a href="/stats?days=7" role="button" class="{% if days == 7 %}primary{% else %}outline{% endif %}" style="padding: 4px 16px;">7d</a>
+    <a href="/stats?days=30" role="button" class="{% if days == 30 %}primary{% else %}outline{% endif %}" style="padding: 4px 16px;">30d</a>
+    <a href="/stats?days=90" role="button" class="{% if days == 90 %}primary{% else %}outline{% endif %}" style="padding: 4px 16px;">90d</a>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+    <article>
+        <h3>{{ stats.total_requests }}</h3>
+        <p>Total requests</p>
+    </article>
+    <article>
+        <h3>{{ "{:,}".format(stats.total_input_tokens) }}</h3>
+        <p>Input tokens</p>
+    </article>
+    <article>
+        <h3>{{ "{:,}".format(stats.total_output_tokens) }}</h3>
+        <p>Output tokens</p>
+    </article>
+    <article>
+        <h3>{{ "{:,}".format(stats.total_input_tokens + stats.total_output_tokens) }}</h3>
+        <p>Total tokens</p>
+    </article>
+</div>
+{% endblock %}

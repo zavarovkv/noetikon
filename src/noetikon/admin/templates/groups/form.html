@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block title %}Edit Group - Noetikon{% endblock %}
+{% block content %}
+<h2>Edit Group: {{ group.title }}</h2>
+
+<form method="post" action="/groups/{{ group.id }}/edit">
+    <label for="title">Title</label>
+    <input type="text" id="title" name="title" value="{{ group.title }}" required>
+
+    <label for="llm_rate_limit">LLM Rate Limit (requests/day)</label>
+    <input type="number" id="llm_rate_limit" name="llm_rate_limit" value="{{ group.llm_rate_limit }}" min="0" required>
+
+    <label for="humor_frequency">Humor Frequency (every N messages)</label>
+    <input type="number" id="humor_frequency" name="humor_frequency" value="{{ group.humor_frequency }}" min="1" required>
+
+    <fieldset>
+        <label>
+            <input type="checkbox" name="is_active" value="true" {% if group.is_active %}checked{% endif %}>
+            Active
+        </label>
+    </fieldset>
+
+    <div style="display: flex; gap: 1rem;">
+        <button type="submit">Save</button>
+        <a href="/groups" role="button" class="secondary outline">Cancel</a>
+    </div>
+</form>
+{% endblock %}

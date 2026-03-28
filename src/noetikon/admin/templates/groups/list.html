@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% block title %}Groups - Noetikon{% endblock %}
+{% block content %}
+<hgroup>
+    <h2>Groups</h2>
+    <p>Telegram groups served by the bot (auto-registered when bot is added)</p>
+</hgroup>
+
+<table>
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Group ID</th>
+            <th>LLM Rate Limit</th>
+            <th>Humor Frequency</th>
+            <th>Active</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for group in groups %}
+        <tr>
+            <td>{{ group.title }}</td>
+            <td>{{ group.group_id }}</td>
+            <td>{{ group.llm_rate_limit }}/day</td>
+            <td>every {{ group.humor_frequency }} msgs</td>
+            <td>{{ "Yes" if group.is_active else "No" }}</td>
+            <td>
+                <a href="/groups/{{ group.id }}/edit" role="button" class="outline secondary" style="padding: 4px 12px; font-size: 0.85em;">Edit</a>
+            </td>
+        </tr>
+        {% endfor %}
+        {% if not groups %}
+        <tr><td colspan="6" style="text-align: center;">No groups yet</td></tr>
+        {% endif %}
+    </tbody>
+</table>
+{% endblock %}

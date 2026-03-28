@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ruff
+      - run: ruff check src/ tests/
+      - run: ruff format --check src/ tests/
+
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: noetikon_test
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 3s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev]"
+      - run: alembic upgrade head
+        env:
+          DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/noetikon_test
+          TELEGRAM_BOT_TOKEN: "fake"
+          ANTHROPIC_API_KEY: "fake"
+          ANTHROPIC_PROXY: "http://localhost:1080"
+          ADMIN_PASSWORD: "test"
+          CALDAV_URL: "https://localhost"
+          CALDAV_USERNAME: "test"
+          CALDAV_PASSWORD: "test"
+          WEBHOOK_URL: "https://localhost"
+      - run: pytest -q
+        env:
+          DATABASE_URL: postgresql+asyncpg://test:test@localhost:5432/noetikon_test
+          TELEGRAM_BOT_TOKEN: "fake"
+          ANTHROPIC_API_KEY: "fake"
+          ANTHROPIC_PROXY: "http://localhost:1080"
+          ADMIN_PASSWORD: "test"
+          CALDAV_URL: "https://localhost"
+          CALDAV_USERNAME: "test"
+          CALDAV_PASSWORD: "test"
+          WEBHOOK_URL: "https://localhost"

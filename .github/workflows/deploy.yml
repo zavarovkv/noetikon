@@ -1,0 +1,53 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate .env
+        run: |
+          cat > .env << 'ENVEOF'
+          TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }}
+          ANTHROPIC_API_KEY=${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_PROXY=${{ secrets.ANTHROPIC_PROXY }}
+          CALDAV_URL=${{ secrets.CALDAV_URL }}
+          CALDAV_USERNAME=${{ secrets.CALDAV_USERNAME }}
+          CALDAV_PASSWORD=${{ secrets.CALDAV_PASSWORD }}
+          POSTGRES_PASSWORD=${{ secrets.POSTGRES_PASSWORD }}
+          ADMIN_USERNAME=${{ secrets.ADMIN_USERNAME }}
+          ADMIN_PASSWORD=${{ secrets.ADMIN_PASSWORD }}
+          WEBHOOK_URL=${{ secrets.WEBHOOK_URL }}
+          WEBHOOK_PORT=${{ secrets.WEBHOOK_PORT }}
+          ADMIN_PORT=${{ secrets.ADMIN_PORT }}
+          ALERT_CHAT_ID=${{ secrets.ALERT_CHAT_ID }}
+          ENVEOF
+
+      - name: Copy files to server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          source: "."
+          target: "~/noetikon"
+
+      - name: Deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}
+          key: ${{ secrets.DEPLOY_SSH_KEY }}
+          script: |
+            cd ~/noetikon
+            docker compose -f docker/docker-compose.yml build --no-cache
+            docker compose -f docker/docker-compose.yml up -d
+            docker compose -f docker/docker-compose.yml ps
